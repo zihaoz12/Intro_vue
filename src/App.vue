@@ -2,7 +2,7 @@
   <div id="app">
     <Header/>
     <AddTodo v-on:add-Todo="addTodo"/>
-    <Todos v-bind:todos="todos" v-on:del-todo="deleteTodo"/>
+    <Todos v-bind:todos="Todos" v-on:del-todo="deleteTodo"/>
   </div>
 </template>
 
@@ -11,41 +11,59 @@ import Header from './components/Todo/Header';
 import Todos from './components/Todo/Todos.vue';
 import AddTodo from './components/Todo/AddTodo.vue';
 
+import axios from 'axios';
+
 export default {
   name: 'app',
   components: {
     Header,
     AddTodo,
-    Todos
+    Todos,
   },
   data(){
     return{
-      todos:[
-        {
-          id:1,
-          title:"Todo One",
-          completed:false
-        },
-        {
-          id:2,
-          title:"Todo Two",
-          completed:true
-        },
-        {
-          id:3,
-          title:"Todo Three",
-          completed:false
-        },
-      ]
+      // todos:[
+      //   {
+      //     id:1,
+      //     title:"Todo One",
+      //     completed:false
+      //   },
+      //   {
+      //     id:2,
+      //     title:"Todo Two",
+      //     completed:true
+      //   },
+      //   {
+      //     id:3,
+      //     title:"Todo Three",
+      //     completed:false
+      //   },
+      // ],
+      Todos:[]
     }
   },
   methods:{
     deleteTodo(id){
-      this.todos = this.todos.filter(todo=> todo.id !== id);
+      // this.todos = this.todos.filter(todo=> todo.id !== id);
+      axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .then(res => this.Todos = this.Todos.filter(todo=>todo.id !== id))
+      .catch(err => console.log(err));
     },
     addTodo(newTodo){
-      this.todos = [...this.todos, newTodo]
+      // this.todos = [...this.todos, newTodo]
+      const {title, completed} = newTodo;
+      axios.post('https://jsonplaceholder.typicode.com/todos',{
+        title,
+        completed
+      }).then(res => this.Todos = [...this.Todos, res.data])
+        .catch(err=>console.log(err))
     }
+  },
+  //when the page load get the api 
+  created(){
+    axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5')
+    .then(res=>this.Todos = res.data)
+    .catch(err=>console.log(err));
   }
 }
 </script>
